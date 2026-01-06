@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MylekhaPOS </title>
-    
+
     <script>
-        window.addEventListener('error', function(e) {
+        window.addEventListener('error', function (e) {
             // If the error comes from an external tracker or plugin, block it.
-            if (e.message.includes('bucket_id') || 
-                e.message.includes('JSON') || 
+            if (e.message.includes('bucket_id') ||
+                e.message.includes('JSON') ||
                 e.message.includes('FedCM') ||
                 (e.filename && (e.filename.includes('tiktok') || e.filename.includes('facebook')))) {
-                
+
                 e.stopImmediatePropagation();
                 e.preventDefault();
                 // We silently block it so the user sees nothing wrong.
@@ -23,13 +24,16 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;600&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
-            --primary: #209a80; /* Teal */
+            --primary: #209a80;
+            /* Teal */
             --card-bg: rgba(10, 10, 18, 0.85);
             --btn-bg: #ffffff;
             --text-white: #ffffff;
@@ -37,165 +41,444 @@
             --text-muted: #a0a0a0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background-color: #050505;
             color: var(--text-white);
             font-family: 'Outfit', sans-serif;
             overflow-x: hidden;
-            width: 100vw;
+            width: 100%;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            padding: 2rem 0;
             perspective: 1200px;
         }
 
-        .kh-font { font-family: 'Kantumruy Pro', sans-serif; }
+        .kh-font {
+            font-family: 'Kantumruy Pro', sans-serif;
+        }
 
         /* --- BACKGROUND CANVAS --- */
         #canvas-bg {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -1;
             background: linear-gradient(to bottom, #1a0b2e 0%, #000000 100%);
         }
 
         /* --- MAIN CARD --- */
         .card {
-            background-color: var(--card-bg); 
-            
+            background-color: var(--card-bg);
+
             /* Subtle Grid Background */
-            background-image: 
+            background-image:
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
             background-size: 30px 30px;
 
-            backdrop-filter: blur(20px); 
+            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
 
             /* --- EDGE LIGHT EFFECT --- */
             /* 1. Thin colored border */
-            border: 1px solid rgba(32, 154, 128, 0.5); 
-            
+            border: 1px solid rgba(32, 154, 128, 0.5);
+
             /* 2. Soft Outer Glow (The "Margin Light") */
-            box-shadow: 0 0 25px rgba(32, 154, 128, 0.4), 
-                        inset 0 0 20px rgba(32, 154, 128, 0.1);
-            
-            width: 90%; max-width: 420px;
-            padding: 3.5rem 2rem; 
-            border-radius: 40px; 
+            box-shadow: 0 0 25px rgba(32, 154, 128, 0.4),
+                inset 0 0 20px rgba(32, 154, 128, 0.1);
+
+            width: 90%;
+            max-width: 420px;
+            padding: 3.5rem 2rem;
+            border-radius: 40px;
             text-align: center;
             position: relative;
-            
+
             /* Animations */
             transform-style: preserve-3d;
-            transform: translateZ(0); 
-            opacity: 0; 
-            animation: 
+            transform: translateZ(0);
+            opacity: 0;
+            animation:
                 floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
                 gridScroll 20s linear infinite,
-                pulseGlow 4s ease-in-out infinite; /* Pulsing light effect */
+                pulseGlow 4s ease-in-out infinite;
+            /* Pulsing light effect */
         }
 
-        @keyframes floatUp { 
-            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
-            to { opacity: 1; transform: translateY(0) scale(1); } 
+        @keyframes floatUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         @keyframes gridScroll {
-            0% { background-position: 0 0; }
-            100% { background-position: 30px 30px; }
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 30px 30px;
+            }
         }
 
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 25px rgba(32, 154, 128, 0.4); border-color: rgba(32, 154, 128, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(32, 154, 128, 0.7); border-color: rgba(32, 154, 128, 0.8); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 25px rgba(32, 154, 128, 0.4);
+                border-color: rgba(32, 154, 128, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(32, 154, 128, 0.7);
+                border-color: rgba(32, 154, 128, 0.8);
+            }
         }
 
         /* --- SETTINGS BUTTON (View Only) --- */
         .settings-btn {
-            position: absolute; top: 25px; right: 25px; width: 35px; height: 35px;
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; z-index: 50; transition: 0.3s; backdrop-filter: blur(5px); color: #fff;
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 50;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+            color: #fff;
             transform: translateZ(40px);
         }
-        .settings-btn:hover { background: rgba(255,255,255,0.25); transform: translateZ(40px) rotate(90deg); }
-        
-        .settings-menu {
-            position: absolute; top: 70px; right: 25px; background: rgba(20, 20, 30, 0.95);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px;
-            width: 160px; display: none; z-index: 60; text-align: left;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateZ(50px);
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateZ(40px) rotate(90deg);
         }
-        .settings-menu.active { display: block; animation: fadeDown 0.3s ease; }
-        @keyframes fadeDown { from{opacity:0; transform:translateZ(50px) translateY(-10px);} to{opacity:1; transform:translateZ(50px) translateY(0);} }
-        
-        .opt-label { font-size: 0.75rem; color: #888; margin-bottom: 8px; text-transform: uppercase; }
-        .lang-row { display: flex; gap: 5px; }
+
+        .settings-menu {
+            position: absolute;
+            top: 70px;
+            right: 25px;
+            background: rgba(20, 20, 30, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            width: 160px;
+            display: none;
+            z-index: 60;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateZ(50px);
+        }
+
+        .settings-menu.active {
+            display: block;
+            animation: fadeDown 0.3s ease;
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateZ(50px) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateZ(50px) translateY(0);
+            }
+        }
+
+        .opt-label {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .lang-row {
+            display: flex;
+            gap: 5px;
+        }
+
         .lang-btn {
-            flex: 1; padding: 6px; font-size: 0.85rem; text-align: center;
-            background: #333; border-radius: 8px; cursor: pointer; border: 1px solid transparent;
+            flex: 1;
+            padding: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+            background: #333;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
             transition: 0.2s;
         }
-        .lang-btn:hover { background: #444; }
-        .lang-btn.active { background: var(--primary); color: white; }
+
+        .lang-btn:hover {
+            background: #444;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+        }
 
         /* --- PROFILE --- */
         .profile-box {
-            width: 110px; height: 110px; margin: 0 auto 1.5rem; position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 1.5rem;
+            position: relative;
             transform: translateZ(30px);
         }
+
         .profile-img {
-            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
-            border: 3px solid var(--primary); padding: 4px; background: transparent;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            padding: 4px;
+            background: transparent;
         }
-        
+
         /* --- TEXT --- */
-        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 5px; transform: translateZ(20px); }
-        .subtitle {
-            color: var(--primary); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;
-            margin-bottom: 1rem; font-weight: 600; transform: translateZ(20px);
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            transform: translateZ(20px);
         }
+
+        .subtitle {
+            color: var(--primary);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            transform: translateZ(20px);
+        }
+
         .desc {
-            color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;
-            margin-bottom: 2.5rem; padding: 0 10px; transform: translateZ(20px);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            padding: 0 10px;
+            transform: translateZ(20px);
         }
 
         /* --- LINKS --- */
-        .link-list { display: flex; flex-direction: column; gap: 14px; transform: translateZ(40px); }
-        .btn {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--btn-bg); color: var(--text-dark); text-decoration: none;
-            padding: 18px 25px; border-radius: 50px; transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid transparent;
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transform: translateZ(40px);
         }
-        .btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15); }
-        .btn-left { display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 1.05rem; }
-        .btn-icon { width: 24px; font-size: 1.5rem; text-align: center; display: flex; justify-content: center; }
-        .btn-arrow { color: #ccc; font-size: 0.9rem; transition: 0.3s; }
-        .btn:hover .btn-arrow { color: var(--text-dark); transform: translateX(5px); }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--btn-bg);
+            color: var(--text-dark);
+            text-decoration: none;
+            padding: 18px 25px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .btn-icon {
+            width: 24px;
+            font-size: 1.5rem;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-arrow {
+            color: #ccc;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .btn:hover .btn-arrow {
+            color: var(--text-dark);
+            transform: translateX(5px);
+        }
+
+        /* --- FEATURE GRID --- */
+        .section-title {
+            margin: 4rem 0 2rem;
+            text-align: center;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 0.5s;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1000px;
+            margin-bottom: 4rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 24px;
+            text-align: left;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            background: rgba(32, 154, 128, 0.1);
+            border-color: rgba(32, 154, 128, 0.3);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: 0.5s;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+                width: 90%;
+            }
+        }
 
         @media (max-width: 480px) {
-            body { perspective: none; }
-            .card { transform: none !important; width: 100%; height: 100vh; border-radius: 0; padding-top: 5rem; background: rgba(10,10,18,0.9); }
-            .btn { padding: 16px 20px; }
-            .settings-btn { top: 20px; right: 20px; transform: none; }
-            .settings-menu { transform: none; right: 20px; top: 65px; }
+            body {
+                perspective: none;
+            }
+
+            .card {
+                transform: none !important;
+                width: 90%;
+                height: auto;
+                border-radius: 40px;
+                padding-top: 3.5rem;
+                background: var(--card-bg);
+                margin-top: 1rem;
+            }
+
+            .btn {
+                padding: 16px 20px;
+            }
+
+            .settings-btn {
+                top: 25px;
+                right: 25px;
+                transform: none;
+            }
+
+            .settings-menu {
+                transform: none;
+                right: 25px;
+                top: 70px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <canvas id="canvas-bg"></canvas>
 
     <div class="card" id="tiltCard">
-        
+
         <div class="settings-btn" onclick="toggleSettings()"><i class="fas fa-cog"></i></div>
-        
+
         <div class="settings-menu" id="settingsMenu">
             <div class="opt-label">Language</div>
             <div class="lang-row">
@@ -207,38 +490,73 @@
         <div class="profile-box">
             <img src="profile.png" alt="Profile" class="profile-img">
         </div>
-        
+
         <h1 id="txt-title">MylekhaPOS</h1>
         <div class="subtitle" id="txt-sub">Smart Point of Sale</div>
         <p class="desc" id="txt-desc">
-            Empowering businesses with seamless transaction solutions. Manage your sales, inventory, and customers efficiently.
+            Empowering businesses with seamless transaction solutions. Manage your sales, inventory, and customers
+            efficiently.
         </p>
 
         <div class="link-list">
             <a href="https://www.facebook.com/share/1BtkYw4Twe/" target="_blank" class="btn">
-                <div class="btn-left"><div class="btn-icon"><i class="fab fa-facebook" style="color: #1877F2;"></i></div><span>Facebook</span></div>
+                <div class="btn-left">
+                    <div class="btn-icon"><i class="fab fa-facebook" style="color: #1877F2;"></i></div>
+                    <span>Facebook</span>
+                </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
-            
+
             <a href="https://www.tiktok.com/@mylekha_pos?_r=1&_t=ZS-92plDvCJTWB" target="_blank" class="btn">
-                <div class="btn-left"><div class="btn-icon"><i class="fab fa-tiktok" style="color: #000000;"></i></div><span>TikTok</span></div>
+                <div class="btn-left">
+                    <div class="btn-icon"><i class="fab fa-tiktok" style="color: #000000;"></i></div><span>TikTok</span>
+                </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
 
             <a href="https://www.youtube.com/@MyLekhaPOS" target="_blank" class="btn">
-                <div class="btn-left"><div class="btn-icon"><i class="fab fa-youtube" style="color: #FF0000;"></i></div><span>YouTube</span></div>
+                <div class="btn-left">
+                    <div class="btn-icon"><i class="fab fa-youtube" style="color: #FF0000;"></i></div>
+                    <span>YouTube</span>
+                </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
 
             <a href="https://mylekha.net/" target="_blank" class="btn">
-                <div class="btn-left"><div class="btn-icon"><i class="fas fa-globe" style="color: var(--primary);"></i></div><span id="txt-web">Website</span></div>
+                <div class="btn-left">
+                    <div class="btn-icon"><i class="fas fa-globe" style="color: var(--primary);"></i></div><span
+                        id="txt-web">Website</span>
+                </div>
                 <div class="btn-arrow"><i class="fas fa-external-link-alt"></i></div>
             </a>
 
             <a href="https://t.me/Mylekha" target="_blank" class="btn">
-                <div class="btn-left"><div class="btn-icon"><i class="fab fa-telegram" style="color: #229ED9;"></i></div><span>Telegram</span></div>
+                <div class="btn-left">
+                    <div class="btn-icon"><i class="fab fa-telegram" style="color: #229ED9;"></i></div>
+                    <span>Telegram</span>
+                </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
+        </div>
+    </div>
+
+    <h2 class="section-title">Our Solutions</h2>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <i class="fas fa-cash-register"></i>
+            <h3>Easy POS</h3>
+            <p>Streamline your sales with our intuitive point-of-sale interface designed for speed.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-boxes"></i>
+            <h3>Inventory</h3>
+            <p>Track stock levels in real-time and automate reordering to never run out of items.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>Reporting</h3>
+            <p>Get deep insights into your business performance with advanced analytics.</p>
         </div>
     </div>
 
@@ -289,7 +607,7 @@
                 this.x = Math.random() * width;
                 this.y = height + Math.random() * 100;
                 this.size = Math.random() * 0.4 + 0.2;
-                this.speedY = Math.random() * 0.5 + 0.2; 
+                this.speedY = Math.random() * 0.5 + 0.2;
                 this.speedX = (Math.random() - 0.5) * 0.5;
                 this.color = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
                 this.flapSpeed = Math.random() * 0.1 + 0.05;
@@ -298,7 +616,7 @@
             }
             update() {
                 this.y -= this.speedY;
-                this.x += this.speedX + Math.sin(this.y * 0.01) * 0.2; 
+                this.x += this.speedX + Math.sin(this.y * 0.01) * 0.2;
                 this.flapTimer += this.flapSpeed;
                 if (this.y < -50) this.init();
             }
@@ -336,7 +654,7 @@
 
         // --- 2. 3D TILT EFFECT ---
         const card = document.getElementById('tiltCard');
-        if(window.innerWidth > 768) {
+        if (window.innerWidth > 768) {
             document.addEventListener('mousemove', (e) => {
                 const x = (window.innerWidth / 2 - e.pageX) / 30;
                 const y = (window.innerHeight / 2 - e.pageY) / 30;
@@ -355,10 +673,10 @@
             kh: { sub: "ប្រព័ន្ធគ្រប់គ្រងការលក់", desc: "ជួយពង្រឹងអាជីវកម្មរបស់អ្នកជាមួយដំណោះស្រាយការទូទាត់ប្រាក់ដ៏រហ័សទាន់ចិត្ត។ គ្រប់គ្រងការលក់ សន្និធិ និងអតិថិជនរបស់អ្នកប្រកបដោយប្រសិទ្ធភាព។", web: "គេហទំព័រ" }
         };
 
-        function toggleSettings() { 
+        function toggleSettings() {
             document.getElementById('settingsMenu').classList.toggle('active');
         }
-        
+
         function setLang(lang, btn) {
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -370,4 +688,5 @@
         }
     </script>
 </body>
+
 </html>

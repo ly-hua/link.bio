@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MylekhaPOS | LinkBio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #209a80; /* Teal */
+            --card-bg: rgba(10, 10, 18, 0.85);
+            --btn-bg: #ffffff;
+            --text-white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-muted: #a0a0a0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #050505;
+            color: var(--text-white);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1200px;
+        }
+
+        .kh-font { font-family: 'Kantumruy Pro', sans-serif; }
+
+        /* --- BACKGROUND CANVAS --- */
+        #canvas-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: linear-gradient(to bottom, #1a0b2e 0%, #000000 100%);
+        }
+
+        /* --- CARD --- */
+        .card {
+            background-color: var(--card-bg); 
+            
+            /* Grid Pattern */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+
+            /* --- EDGE LIGHT EFFECT --- */
+            /* 1. Thin colored border */
+            border: 1px solid rgba(32, 154, 128, 0.5); 
+            
+            /* 2. Soft Outer Glow (The "Margin Light") */
+            box-shadow: 0 0 25px rgba(32, 154, 128, 0.4), 
+                        inset 0 0 20px rgba(32, 154, 128, 0.1); /* Inner glow for depth */
+            
+            width: 90%; max-width: 420px;
+            padding: 3.5rem 2rem; 
+            border-radius: 40px; 
+            text-align: center;
+            position: relative;
+            
+            /* Animations */
+            transform-style: preserve-3d;
+            transform: translateZ(0); 
+            opacity: 0; 
+            animation: 
+                floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
+                gridScroll 20s linear infinite,
+                pulseGlow 4s ease-in-out infinite; /* Pulsing light effect */
+        }
+
+        @keyframes floatUp { 
+            from { opacity: 0; transform: translateY(40px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        @keyframes gridScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 30px 30px; }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 25px rgba(32, 154, 128, 0.4); border-color: rgba(32, 154, 128, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(32, 154, 128, 0.7); border-color: rgba(32, 154, 128, 0.8); }
+        }
+
+        /* --- SETTINGS BUTTON (View Only - No Login) --- */
+        .settings-btn {
+            position: absolute; top: 25px; right: 25px; width: 35px; height: 35px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; z-index: 50; transition: 0.3s; backdrop-filter: blur(5px); color: #fff;
+            transform: translateZ(40px);
+        }
+        .settings-btn:hover { background: rgba(255,255,255,0.25); transform: translateZ(40px) rotate(90deg); }
+        
+        .settings-menu {
+            position: absolute; top: 70px; right: 25px; background: rgba(20, 20, 30, 0.95);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px;
+            width: 160px; display: none; z-index: 60; text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateZ(50px);
+        }
+        .settings-menu.active { display: block; animation: fadeDown 0.3s ease; }
+        @keyframes fadeDown { from{opacity:0; transform:translateZ(50px) translateY(-10px);} to{opacity:1; transform:translateZ(50px) translateY(0);} }
+        
+        .opt-label { font-size: 0.75rem; color: #888; margin-bottom: 8px; text-transform: uppercase; }
+        .lang-row { display: flex; gap: 5px; }
+        .lang-btn {
+            flex: 1; padding: 6px; font-size: 0.85rem; text-align: center;
+            background: #333; border-radius: 8px; cursor: pointer; border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .lang-btn:hover { background: #444; }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        /* --- PROFILE --- */
+        .profile-box {
+            width: 110px; height: 110px; margin: 0 auto 1.5rem; position: relative;
+            transform: translateZ(30px);
+        }
+        .profile-img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--primary); padding: 4px; background: transparent;
+        }
+        
+        /* --- TEXT --- */
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 5px; transform: translateZ(20px); }
+        .subtitle {
+            color: var(--primary); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;
+            margin-bottom: 1rem; font-weight: 600; transform: translateZ(20px);
+        }
+        .desc {
+            color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;
+            margin-bottom: 2.5rem; padding: 0 10px; transform: translateZ(20px);
+        }
+
+        /* --- LINKS --- */
+        .link-list { display: flex; flex-direction: column; gap: 14px; transform: translateZ(40px); }
+        .btn {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--btn-bg); color: var(--text-dark); text-decoration: none;
+            padding: 18px 25px; border-radius: 50px; transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid transparent;
+        }
+        .btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15); }
+        .btn-left { display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 1.05rem; }
+        .btn-icon { width: 24px; font-size: 1.5rem; text-align: center; display: flex; justify-content: center; }
+        .btn-arrow { color: #ccc; font-size: 0.9rem; transition: 0.3s; }
+        .btn:hover .btn-arrow { color: var(--text-dark); transform: translateX(5px); }
+
+        @media (max-width: 480px) {
+            body { perspective: none; }
+            .card { transform: none !important; width: 100%; height: 100vh; border-radius: 0; padding-top: 5rem; background: rgba(10,10,18,0.9); }
+            .btn { padding: 16px 20px; }
+            .settings-btn { top: 20px; right: 20px; transform: none; }
+            .settings-menu { transform: none; right: 20px; top: 65px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="card" id="tiltCard">
+        
+        <div class="settings-btn" onclick="toggleSettings()"><i class="fas fa-cog"></i></div>
+        
+        <div class="settings-menu" id="settingsMenu">
+            <div class="opt-label">Language</div>
+            <div class="lang-row">
+                <div class="lang-btn active" onclick="setLang('en', this)">EN</div>
+                <div class="lang-btn" onclick="setLang('kh', this)">KH</div>
+            </div>
+        </div>
+
+        <div class="profile-box">
+            <img src="profile.png" alt="Profile" class="profile-img">
+        </div>
+        
+        <h1 id="txt-title">MylekhaPOS</h1>
+        <div class="subtitle" id="txt-sub">Smart Point of Sale</div>
+        <p class="desc" id="txt-desc">
+            Empowering businesses with seamless transaction solutions. Manage your sales, inventory, and customers efficiently.
+        </p>
+
+        <div class="link-list">
+            <a href="https://www.facebook.com/share/1BtkYw4Twe/" target="_blank" class="btn">
+                <div class="btn-left"><div class="btn-icon"><i class="fab fa-facebook" style="color: #1877F2;"></i></div><span>Facebook</span></div>
+                <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+            
+            <a href="https://www.tiktok.com/@mylekha_pos?_r=1&_t=ZS-92plDvCJTWB" target="_blank" class="btn">
+                <div class="btn-left"><div class="btn-icon"><i class="fab fa-tiktok" style="color: #000000;"></i></div><span>TikTok</span></div>
+                <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+
+            <a href="https://www.youtube.com/@MyLekhaPOS" target="_blank" class="btn">
+                <div class="btn-left"><div class="btn-icon"><i class="fab fa-youtube" style="color: #FF0000;"></i></div><span>YouTube</span></div>
+                <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+
+            <a href="https://mylekha.net/" target="_blank" class="btn">
+                <div class="btn-left"><div class="btn-icon"><i class="fas fa-globe" style="color: var(--primary);"></i></div><span id="txt-web">Website</span></div>
+                <div class="btn-arrow"><i class="fas fa-external-link-alt"></i></div>
+            </a>
+
+            <a href="https://t.me/Mylekha" target="_blank" class="btn">
+                <div class="btn-left"><div class="btn-icon"><i class="fab fa-telegram" style="color: #229ED9;"></i></div><span>Telegram</span></div>
+                <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. RAINBOW RAIN & BUTTERFLIES ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        const rainbowColors = ['#ff00cc', '#a600ff', '#00d4ff', '#ffcc00', '#ffffff'];
+        const drops = [];
+        const butterflies = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        class Drop {
+            constructor() { this.init(true); }
+            init(randomY = false) {
+                this.x = Math.random() * width;
+                this.y = randomY ? Math.random() * height : -100;
+                this.speed = Math.random() * 2 + 3;
+                this.len = Math.random() * 30 + 10;
+                this.width = Math.random() * 1 + 0.5;
+                this.color = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
+                this.opacity = Math.random() * 0.3 + 0.1;
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > height) this.init();
+            }
+            draw() {
+                const grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y - this.len);
+                grad.addColorStop(0, this.color); grad.addColorStop(1, 'transparent');
+                ctx.fillStyle = grad; ctx.globalAlpha = this.opacity;
+                ctx.fillRect(this.x, this.y - this.len, this.width, this.len);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        class Butterfly {
+            constructor() {
+                this.init();
+                this.y = Math.random() * height;
+            }
+            init() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 100;
+                this.size = Math.random() * 0.4 + 0.2;
+                this.speedY = Math.random() * 0.5 + 0.2; 
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.color = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
+                this.flapSpeed = Math.random() * 0.1 + 0.05;
+                this.flapTimer = 0;
+                this.wingPath = new Path2D("M0,0 C10,-20 30,-20 30,0 C30,20 10,20 0,0 C-10,30 -30,30 -30,0 C-30,-30 -10,-30 0,0");
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX + Math.sin(this.y * 0.01) * 0.2; 
+                this.flapTimer += this.flapSpeed;
+                if (this.y < -50) this.init();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.size, this.size);
+                ctx.rotate(this.speedX * 0.5);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.8;
+                const flapScale = Math.sin(this.flapTimer);
+                ctx.save(); ctx.scale(1, flapScale); ctx.fill(this.wingPath); ctx.restore();
+                ctx.save(); ctx.scale(-1, flapScale); ctx.fill(this.wingPath); ctx.restore();
+                ctx.restore();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        function initBG() {
+            resize();
+            for (let i = 0; i < 250; i++) drops.push(new Drop());
+            for (let i = 0; i < 25; i++) butterflies.push(new Butterfly());
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            drops.forEach(d => { d.update(); d.draw(); });
+            butterflies.forEach(b => { b.update(); b.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        initBG();
+
+        // --- 2. 3D TILT EFFECT ---
+        const card = document.getElementById('tiltCard');
+        if(window.innerWidth > 768) {
+            document.addEventListener('mousemove', (e) => {
+                const x = (window.innerWidth / 2 - e.pageX) / 30;
+                const y = (window.innerHeight / 2 - e.pageY) / 30;
+                const clampX = Math.max(-15, Math.min(15, x));
+                const clampY = Math.max(-15, Math.min(15, y));
+                card.style.transform = `rotateY(${clampX}deg) rotateX(${clampY}deg)`;
+            });
+            document.addEventListener('mouseleave', () => {
+                card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+            });
+        }
+
+        // --- 3. LANGUAGE SETTINGS ---
+        const translations = {
+            en: { sub: "Smart Point of Sale", desc: "Empowering businesses with seamless transaction solutions. Manage your sales, inventory, and customers efficiently.", web: "Website" },
+            kh: { sub: "ប្រព័ន្ធគ្រប់គ្រងការលក់", desc: "ជួយពង្រឹងអាជីវកម្មរបស់អ្នកជាមួយដំណោះស្រាយការទូទាត់ប្រាក់ដ៏រហ័សទាន់ចិត្ត។ គ្រប់គ្រងការលក់ សន្និធិ និងអតិថិជនរបស់អ្នកប្រកបដោយប្រសិទ្ធភាព។", web: "គេហទំព័រ" }
+        };
+
+        function toggleSettings() { 
+            document.getElementById('settingsMenu').classList.toggle('active');
+        }
+        
+        function setLang(lang, btn) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const data = translations[lang];
+            const sub = document.getElementById('txt-sub'), desc = document.getElementById('txt-desc'), web = document.getElementById('txt-web');
+            sub.innerText = data.sub; desc.innerText = data.desc; web.innerText = data.web;
+            const action = lang === 'kh' ? 'add' : 'remove';
+            sub.classList[action]('kh-font'); desc.classList[action]('kh-font'); web.classList[action]('kh-font');
+        }
+    </script>
+</body>
+</html>

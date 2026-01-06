@@ -98,7 +98,7 @@
                 inset 0 0 20px rgba(32, 154, 128, 0.1);
 
             width: 90%;
-            max-width: 420px;
+            max-width: 440px;
             padding: 3.5rem 2rem;
             border-radius: 40px;
             text-align: center;
@@ -112,7 +112,7 @@
                 floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
                 gridScroll 20s linear infinite,
                 pulseGlow 4s ease-in-out infinite;
-            /* Pulsing light effect */
+            margin-bottom: 2rem;
         }
 
         @keyframes floatUp {
@@ -432,40 +432,52 @@
 
         @media (max-width: 768px) {
             .features-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                 width: 90%;
+            }
+
+            .card {
+                max-width: 420px;
             }
         }
 
         @media (max-width: 480px) {
             body {
                 perspective: none;
+                padding: 1rem 0;
             }
 
             .card {
                 transform: none !important;
-                width: 90%;
-                height: auto;
-                border-radius: 40px;
-                padding-top: 3.5rem;
-                background: var(--card-bg);
-                margin-top: 1rem;
+                width: 95%;
+                max-width: none;
+                border-radius: 35px;
+                padding: 2.5rem 1.5rem;
+                margin-top: 0.5rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .desc {
+                font-size: 0.85rem;
+                margin-bottom: 2rem;
             }
 
             .btn {
-                padding: 16px 20px;
+                padding: 15px 20px;
+                font-size: 0.95rem;
             }
 
-            .settings-btn {
-                top: 25px;
-                right: 25px;
-                transform: none;
+            .features-grid {
+                grid-template-columns: 1fr;
+                width: 95%;
             }
 
-            .settings-menu {
-                transform: none;
-                right: 25px;
-                top: 70px;
+            .section-title {
+                margin: 2.5rem 0 1.5rem;
+                font-size: 1.2rem;
             }
         }
     </style>

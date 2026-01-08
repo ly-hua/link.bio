@@ -4,19 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MylekhaPOS </title>
+    <title>MylekhaPOS</title>
 
     <script>
         window.addEventListener('error', function (e) {
-            // If the error comes from an external tracker or plugin, block it.
             if (e.message.includes('bucket_id') ||
                 e.message.includes('JSON') ||
                 e.message.includes('FedCM') ||
                 (e.filename && (e.filename.includes('tiktok') || e.filename.includes('facebook')))) {
-
                 e.stopImmediatePropagation();
                 e.preventDefault();
-                // We silently block it so the user sees nothing wrong.
                 return true;
             }
         }, true);
@@ -27,18 +24,48 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;600&family=Outfit:wght@400;600;700&display=swap"
         rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
+            /* --- DEFAULT DARK THEME VARIABLES --- */
             --primary: #209a80;
-            /* Teal */
             --card-bg: rgba(10, 10, 18, 0.85);
+            --card-border: rgba(32, 154, 128, 0.5);
+            --bg-gradient: linear-gradient(to bottom, #1a0b2e 0%, #000000 100%);
+
             --btn-bg: #ffffff;
-            --text-white: #ffffff;
-            --text-dark: #1a1a1a;
-            --text-muted: #a0a0a0;
+            --btn-text: #1a1a1a;
+            --btn-sub: #a0a0a0;
+
+            --text-main: #ffffff;
+            --text-desc: #a0a0a0;
+
+            --settings-bg: rgba(20, 20, 30, 0.95);
+            --settings-text: #fff;
+            --settings-opt: #888;
+            --settings-btn-bg: #333;
+        }
+
+        /* --- LIGHT THEME OVERRIDES --- */
+        body.light-mode {
+            --primary: #157a65;
+            /* Slightly darker teal for contrast on white */
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(32, 154, 128, 0.3);
+            --bg-gradient: linear-gradient(to bottom, #e0f7fa 0%, #ffffff 100%);
+
+            --btn-bg: #f3f4f6;
+            --btn-text: #1a1a1a;
+            --btn-sub: #666666;
+
+            --text-main: #1a1a1a;
+            --text-desc: #555555;
+
+            --settings-bg: rgba(255, 255, 255, 0.95);
+            --settings-text: #1a1a1a;
+            --settings-opt: #666;
+            --settings-btn-bg: #e0e0e0;
         }
 
         * {
@@ -49,7 +76,7 @@
 
         body {
             background-color: #050505;
-            color: var(--text-white);
+            color: var(--text-main);
             font-family: 'Outfit', sans-serif;
             overflow-x: hidden;
             width: 100%;
@@ -59,6 +86,7 @@
             align-items: center;
             padding: 2rem 0;
             perspective: 1200px;
+            transition: color 0.3s ease;
         }
 
         .kh-font {
@@ -73,46 +101,34 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: linear-gradient(to bottom, #1a0b2e 0%, #000000 100%);
+            background: var(--bg-gradient);
+            transition: background 0.5s ease;
         }
 
         /* --- MAIN CARD --- */
         .card {
             background-color: var(--card-bg);
-
-            /* Subtle Grid Background */
+            /* Grid Pattern - Dynamic based on theme opacity */
             background-image:
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+                linear-gradient(rgba(128, 128, 128, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(128, 128, 128, 0.05) 1px, transparent 1px);
             background-size: 30px 30px;
-
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-
-            /* --- EDGE LIGHT EFFECT --- */
-            /* 1. Thin colored border */
-            border: 1px solid rgba(32, 154, 128, 0.5);
-
-            /* 2. Soft Outer Glow (The "Margin Light") */
-            box-shadow: 0 0 25px rgba(32, 154, 128, 0.4),
-                inset 0 0 20px rgba(32, 154, 128, 0.1);
-
+            border: 1px solid var(--card-border);
+            box-shadow: 0 0 25px rgba(32, 154, 128, 0.2), inset 0 0 20px rgba(32, 154, 128, 0.05);
             width: 90%;
             max-width: 440px;
             padding: 3.5rem 2rem;
             border-radius: 40px;
             text-align: center;
             position: relative;
-
-            /* Animations */
             transform-style: preserve-3d;
             transform: translateZ(0);
             opacity: 0;
-            animation:
-                floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
-                gridScroll 20s linear infinite,
-                pulseGlow 4s ease-in-out infinite;
+            animation: floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, gridScroll 20s linear infinite;
             margin-bottom: 2rem;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         @keyframes floatUp {
@@ -137,29 +153,15 @@
             }
         }
 
-        @keyframes pulseGlow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 25px rgba(32, 154, 128, 0.4);
-                border-color: rgba(32, 154, 128, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 40px rgba(32, 154, 128, 0.7);
-                border-color: rgba(32, 154, 128, 0.8);
-            }
-        }
-
-        /* --- SETTINGS BUTTON (View Only) --- */
+        /* --- SETTINGS BUTTON --- */
         .settings-btn {
             position: absolute;
             top: 25px;
             right: 25px;
             width: 35px;
             height: 35px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(128, 128, 128, 0.1);
+            border: 1px solid rgba(128, 128, 128, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -168,12 +170,12 @@
             z-index: 50;
             transition: 0.3s;
             backdrop-filter: blur(5px);
-            color: #fff;
+            color: var(--text-main);
             transform: translateZ(40px);
         }
 
         .settings-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(128, 128, 128, 0.25);
             transform: translateZ(40px) rotate(90deg);
         }
 
@@ -181,16 +183,17 @@
             position: absolute;
             top: 70px;
             right: 25px;
-            background: rgba(20, 20, 30, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--settings-bg);
+            border: 1px solid rgba(128, 128, 128, 0.2);
             border-radius: 15px;
             padding: 15px;
-            width: 160px;
+            width: 170px;
             display: none;
             z-index: 60;
             text-align: left;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             transform: translateZ(50px);
+            color: var(--settings-text);
         }
 
         .settings-menu.active {
@@ -212,33 +215,38 @@
 
         .opt-label {
             font-size: 0.75rem;
-            color: #888;
+            color: var(--settings-opt);
             margin-bottom: 8px;
             text-transform: uppercase;
+            margin-top: 10px;
         }
 
-        .lang-row {
+        .opt-label:first-child {
+            margin-top: 0;
+        }
+
+        .opt-row {
             display: flex;
             gap: 5px;
         }
 
-        .lang-btn {
+        .opt-btn {
             flex: 1;
             padding: 6px;
             font-size: 0.85rem;
             text-align: center;
-            background: #333;
+            background: var(--settings-btn-bg);
             border-radius: 8px;
             cursor: pointer;
-            border: 1px solid transparent;
             transition: 0.2s;
+            color: var(--settings-text);
         }
 
-        .lang-btn:hover {
-            background: #444;
+        .opt-btn:hover {
+            opacity: 0.8;
         }
 
-        .lang-btn.active {
+        .opt-btn.active {
             background: var(--primary);
             color: white;
         }
@@ -268,6 +276,7 @@
             font-weight: 700;
             margin-bottom: 5px;
             transform: translateZ(20px);
+            color: var(--text-main);
         }
 
         .subtitle {
@@ -281,12 +290,39 @@
         }
 
         .desc {
-            color: var(--text-muted);
+            color: var(--text-desc);
             font-size: 0.95rem;
             line-height: 1.6;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
             padding: 0 10px;
             transform: translateZ(20px);
+        }
+
+        /* --- CONTACT PILL --- */
+        .contact-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(32, 154, 128, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            transform: translateZ(25px);
+            cursor: pointer;
+        }
+
+        .contact-pill:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(32, 154, 128, 0.5);
+            transform: translateZ(35px) scale(1.05);
         }
 
         /* --- LINKS --- */
@@ -302,26 +338,43 @@
             align-items: center;
             justify-content: space-between;
             background: var(--btn-bg);
-            color: var(--text-dark);
+            color: var(--btn-text);
             text-decoration: none;
-            padding: 18px 25px;
+            padding: 12px 20px;
             border-radius: 50px;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             border: 2px solid transparent;
         }
 
         .btn:hover {
             transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .btn-left {
             display: flex;
             align-items: center;
             gap: 15px;
-            font-weight: 600;
+            text-align: left;
+        }
+
+        /* Button Text Layout */
+        .btn-text-group {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+        }
+
+        .btn-title {
             font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .btn-sub {
+            font-size: 0.75rem;
+            color: var(--btn-sub);
+            font-weight: 400;
         }
 
         .btn-icon {
@@ -339,13 +392,11 @@
         }
 
         .btn:hover .btn-arrow {
-            color: var(--text-dark);
+            color: var(--btn-text);
             transform: translateX(5px);
         }
 
-
         @media (max-width: 768px) {
-
             .card {
                 max-width: 420px;
             }
@@ -372,14 +423,17 @@
 
             .desc {
                 font-size: 0.85rem;
-                margin-bottom: 2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .contact-pill {
+                width: 100%;
+                margin-bottom: 1.5rem;
             }
 
             .btn {
-                padding: 15px 20px;
-                font-size: 0.95rem;
+                padding: 12px 18px;
             }
-
         }
     </style>
 </head>
@@ -393,11 +447,19 @@
         <div class="settings-btn" onclick="toggleSettings()"><i class="fas fa-cog"></i></div>
 
         <div class="settings-menu" id="settingsMenu">
+
             <div class="opt-label">Language</div>
-            <div class="lang-row">
-                <div class="lang-btn active" onclick="setLang('en', this)">EN</div>
-                <div class="lang-btn" onclick="setLang('kh', this)">KH</div>
+            <div class="opt-row">
+                <div class="opt-btn active" id="lang-en" onclick="setLang('en')">EN</div>
+                <div class="opt-btn" id="lang-kh" onclick="setLang('kh')">KH</div>
             </div>
+
+            <div class="opt-label">Mode</div>
+            <div class="opt-row">
+                <div class="opt-btn active" id="theme-dark" onclick="setTheme('dark')"><i class="fas fa-moon"></i></div>
+                <div class="opt-btn" id="theme-light" onclick="setTheme('light')"><i class="fas fa-sun"></i></div>
+            </div>
+
         </div>
 
         <div class="profile-box">
@@ -406,23 +468,36 @@
 
         <h1 id="txt-title">MylekhaPOS</h1>
         <div class="subtitle" id="txt-sub">Smart Point of Sale</div>
+
         <p class="desc" id="txt-desc">
             Empowering businesses with seamless transaction solutions. Manage your sales, inventory, and customers
             efficiently.
         </p>
 
+        <a href="tel:081666078" class="contact-pill">
+            <i class="fas fa-phone-volume"></i> 081 666 078
+        </a>
+
         <div class="link-list">
+
             <a href="https://www.facebook.com/share/1BtkYw4Twe/" target="_blank" class="btn">
                 <div class="btn-left">
                     <div class="btn-icon"><i class="fab fa-facebook" style="color: #1877F2;"></i></div>
-                    <span>Facebook</span>
+                    <div class="btn-text-group">
+                        <span class="btn-title">Facebook</span>
+                        <span class="btn-sub">Latest news & updates</span>
+                    </div>
                 </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
 
             <a href="https://www.tiktok.com/@mylekha_pos?_r=1&_t=ZS-92plDvCJTWB" target="_blank" class="btn">
                 <div class="btn-left">
-                    <div class="btn-icon"><i class="fab fa-tiktok" style="color: #000000;"></i></div><span>TikTok</span>
+                    <div class="btn-icon"><i class="fab fa-tiktok" style="color: var(--btn-text);"></i></div>
+                    <div class="btn-text-group">
+                        <span class="btn-title">TikTok</span>
+                        <span class="btn-sub">Watch our tutorials</span>
+                    </div>
                 </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
@@ -430,15 +505,21 @@
             <a href="https://www.youtube.com/@MyLekhaPOS" target="_blank" class="btn">
                 <div class="btn-left">
                     <div class="btn-icon"><i class="fab fa-youtube" style="color: #FF0000;"></i></div>
-                    <span>YouTube</span>
+                    <div class="btn-text-group">
+                        <span class="btn-title">YouTube</span>
+                        <span class="btn-sub">Full guides & demos</span>
+                    </div>
                 </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
 
             <a href="https://mylekha.net/" target="_blank" class="btn">
                 <div class="btn-left">
-                    <div class="btn-icon"><i class="fas fa-globe" style="color: var(--primary);"></i></div><span
-                        id="txt-web">Website</span>
+                    <div class="btn-icon"><i class="fas fa-globe" style="color: var(--primary);"></i></div>
+                    <div class="btn-text-group">
+                        <span class="btn-title" id="txt-web">Website</span>
+                        <span class="btn-sub">View pricing & features</span>
+                    </div>
                 </div>
                 <div class="btn-arrow"><i class="fas fa-external-link-alt"></i></div>
             </a>
@@ -446,7 +527,10 @@
             <a href="https://t.me/Mylekha" target="_blank" class="btn">
                 <div class="btn-left">
                     <div class="btn-icon"><i class="fab fa-telegram" style="color: #229ED9;"></i></div>
-                    <span>Telegram</span>
+                    <div class="btn-text-group">
+                        <span class="btn-title">Telegram</span>
+                        <span class="btn-sub">Contact support directly</span>
+                    </div>
                 </div>
                 <div class="btn-arrow"><i class="fas fa-chevron-right"></i></div>
             </a>
@@ -561,7 +645,7 @@
             });
         }
 
-        // --- 3. LANGUAGE SETTINGS ---
+        // --- 3. SETTINGS: TRANSLATIONS ---
         const translations = {
             en: { sub: "Smart Point of Sale", desc: "Empowering businesses with seamless transaction solutions. Manage your sales, inventory, and customers efficiently.", web: "Website" },
             kh: { sub: "ប្រព័ន្ធគ្រប់គ្រងការលក់", desc: "ជួយពង្រឹងអាជីវកម្មរបស់អ្នកជាមួយដំណោះស្រាយការទូទាត់ប្រាក់ដ៏រហ័សទាន់ចិត្ត។ គ្រប់គ្រងការលក់ សន្និធិ និងអតិថិជនរបស់អ្នកប្រកបដោយប្រសិទ្ធភាព។", web: "គេហទំព័រ" }
@@ -571,14 +655,32 @@
             document.getElementById('settingsMenu').classList.toggle('active');
         }
 
-        function setLang(lang, btn) {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function setLang(lang) {
+            // Update Active Buttons
+            document.getElementById('lang-en').classList.remove('active');
+            document.getElementById('lang-kh').classList.remove('active');
+            document.getElementById('lang-' + lang).classList.add('active');
+
+            // Apply Text
             const data = translations[lang];
             const sub = document.getElementById('txt-sub'), desc = document.getElementById('txt-desc'), web = document.getElementById('txt-web');
             sub.innerText = data.sub; desc.innerText = data.desc; web.innerText = data.web;
             const action = lang === 'kh' ? 'add' : 'remove';
             sub.classList[action]('kh-font'); desc.classList[action]('kh-font'); web.classList[action]('kh-font');
+        }
+
+        function setTheme(mode) {
+            // Update Active Buttons
+            document.getElementById('theme-dark').classList.remove('active');
+            document.getElementById('theme-light').classList.remove('active');
+            document.getElementById('theme-' + mode).classList.add('active');
+
+            // Apply Class to Body
+            if (mode === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
         }
     </script>
 </body>
